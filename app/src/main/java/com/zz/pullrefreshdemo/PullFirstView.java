@@ -95,7 +95,7 @@ public class PullFirstView extends View {
      * @param currentProgress
      * @return
      */
-    private void setCurrentProgress(float currentProgress) {
+    public void setCurrentProgress(float currentProgress) {
         mCurrentProgress = currentProgress;
     }
 }

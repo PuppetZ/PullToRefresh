@@ -173,17 +173,72 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
                     case MotionEvent.ACTION_MOVE://滑动
                         //手指刚嗯下Y轴距离
                         float tempY = ev.getY();
-                        if (mFirstVisibleItem ==0 &&!isRecondY){
+                        if (mFirstVisibleItem == 0 && !isRecondY) {
                             isRecondY = true;
                             startY = tempY;
                         }
                         //如果当前状态不是第三状态 正在刷新 ，记录Y坐标
-                        if (state != PULL_THIRD && isRecondY){
+                        if (state != PULL_THIRD && isRecondY) {
                             offsetY = tempY - startY;//Y轴偏移
-                            float currentHeight = (-headerViewHeight + offsetY/3);//当前Y轴滑动距离 3就是随便一个系数
-                            float currentProgress = 1+currentHeight/headerViewHeight;//用当前滑动的高度和头部headerView的总高度进行比 计算出当前滑动的百分比 0到1
+                            float currentHeight = (-headerViewHeight + offsetY / 3);//当前Y轴滑动距离 3就是随便一个系数
+                            float currentProgress = 1 + currentHeight / headerViewHeight;//用当前滑动的高度和头部headerView的总高度进行比 计算出当前滑动的百分比 0到1
+                            if (currentProgress > 1) {//如果百分比>1，默认为1
+                                currentProgress = 1;
+                            }
+                            //如果是第四状态 正在刷新
+                            if (state == PULL_FOUTH && isRecondY) {
+                                setSelection(0);//默认lv选择了第一个item
+                                if (-headerViewHeight + offsetY / 3 < 0) {//下拉的位移小于headview，继续是下拉状态
+                                    state = PULL_SECOND;
+                                    headerViewState(state);
+                                } else if (offsetY < 0) {//下拉位移<0，是第一个状态
+                                    state = PULL_FIRST;
+                                    headerViewState(state);
+                                }
+                            }
+                            //如果是第三状态 下拉状态
+                            if (state == PULL_SECOND && isRecondY) {
+                                setSelection(0);
+                                if (-headerViewHeight + offsetY / 3 >= 0) {
+                                    state = PULL_FOUTH;
+                                    headerViewState(state);
+                                } else if (offsetY <= 0) {
+                                    state = PULL_FIRST;
+                                    headerViewState(state);
+                                }
+                            }
+                            //如果是第一状态 刷新完成或未刷新的状态
+                            if (state == PULL_FIRST && isRecondY) {
+                                if (offsetY >= 0) {
+                                    state = PULL_SECOND;
+                                    headerViewState(state);
+                                }
+                            }
+                            //如果是第二状态  下拉状态  或者第三状态  放开刷新状态
+                            if (state == PULL_SECOND || state == PULL_FOUTH) {
+                                headerView.setPadding(0, (int) (-headerViewHeight + offsetY / 3), 0, 0);
+                                pull_refresh_first_view.setCurrentProgress(currentProgress);
+                                pull_refresh_first_view.postInvalidate();//firstView重绘（在主线程可以重绘）
+                            }
+                            /*if (state ==PULL_FOUTH){
 
+                            }*/
                         }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        //如果是第二状态  下拉刷新状态
+                        if (state == PULL_SECOND) {
+                            this.smoothScrollBy((int) (-headerViewHeight + offsetY / 3) + headerViewHeight, 500);//隐藏headView
+                            headerViewState(state);
+                        }
+                        //如果是第三状态  放开刷新状态
+                        if (state == PULL_THIRD){
+                            this.smoothScrollBy((int) (-headerViewHeight + offsetY / 3) + headerViewHeight, 500);//隐藏headView
+                            state = PULL_FOUTH;
+                            mOnMyRefreshListener.onRefresh();
+                            headerViewState(state);
+                        }
+                        isRecondY = false;
                         break;
                 }
             }
