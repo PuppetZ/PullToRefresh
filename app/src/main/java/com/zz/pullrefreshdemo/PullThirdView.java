@@ -8,52 +8,49 @@ import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * Created by zhangjing on 2017/8/18.
+ * Created by zhangjing on 2017/8/29.
  */
 
-public class PullSecondView extends View {
+public class PullThirdView extends View {
     private Bitmap endBitmap;
 
-
-    public PullSecondView(Context context) {
+    public PullThirdView(Context context) {
         super(context);
         init();
     }
 
-
-    public PullSecondView(Context context, @Nullable AttributeSet attrs) {
+    public PullThirdView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public PullSecondView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public PullThirdView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
     private void init() {
         endBitmap = Bitmap.createBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.pull_end_image_frame_05));
+
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(measureWidth(widthMeasureSpec), measureWidth(widthMeasureSpec) / endBitmap.getWidth() * endBitmap.getHeight());
+        setMeasuredDimension(measureWidth(widthMeasureSpec), measureWidth(widthMeasureSpec)*endBitmap.getHeight()/endBitmap.getWidth());
     }
 
-    private int measureWidth(int widthMeasureSpec) {
-        int width = 0;
+    private int measureWidth(int widthMeasureSpec){
+        int result = 0;
         int size = MeasureSpec.getSize(widthMeasureSpec);
         int mode = MeasureSpec.getMode(widthMeasureSpec);
         if (mode == MeasureSpec.EXACTLY) {
-            width = size;
-
-        } else {
-            width = endBitmap.getWidth();
+            result = size;
+        }else {
+            result = endBitmap.getWidth();
             if (mode == MeasureSpec.AT_MOST) {
-                width = Math.min(width, size);
+                result = Math.min(result, size);
             }
         }
-        return width;
+        return result;
     }
 }

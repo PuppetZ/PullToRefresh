@@ -33,7 +33,8 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
     private float offsetY;//Y轴滑动的距离
     private OnMyRefreshListener mOnMyRefreshListener;
     private PullFirstView pull_refresh_first_view;//下拉状态的view
-    private ImageView pull_refresh_second_view, pull_refresh_third_view;//下拉完成时和刷新时的view
+    private PullSecondView pull_refresh_second_view;
+    private PullThirdView pull_refresh_third_view;//下拉完成时和刷新时的view
     private AnimationDrawable secondAnim, thirdAnim;//下拉完成时和刷新时的动画
     private TextView pull_refresh_text_view;
 
@@ -70,6 +71,7 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
 
     public void setOnMyRefreshListener(OnMyRefreshListener onMyRefreshListener) {
         mOnMyRefreshListener = onMyRefreshListener;
+        isRefreable = true;
     }
 
     private void initView(Context context) {
@@ -77,8 +79,8 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
         setOverScrollMode(OVER_SCROLL_NEVER);//Overscroll（边界回弹）效果 当滑动到边界的时候，如果再滑动，就会有一个边界就会有一个发光效果。
         headerView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.pull_refresh, null);
         pull_refresh_first_view = (PullFirstView) headerView.findViewById(R.id.pull_refresh_first_view);
-        pull_refresh_second_view = (ImageView) headerView.findViewById(R.id.pull_refresh_second_view);
-        pull_refresh_third_view = (ImageView) headerView.findViewById(R.id.pull_refresh_third_view);
+        pull_refresh_second_view = (PullSecondView) headerView.findViewById(R.id.pull_refresh_second_view);
+        pull_refresh_third_view = (PullThirdView) headerView.findViewById(R.id.pull_refresh_third_view);
         pull_refresh_second_view.setBackgroundResource(R.drawable.pull_to_end_anim);
         pull_refresh_third_view.setBackgroundResource(R.drawable.refresh_to_end_anim);
         secondAnim = (AnimationDrawable) pull_refresh_second_view.getBackground();//下拉完成动画
@@ -196,11 +198,11 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
                                     headerViewState(state);
                                 }
                             }
-                            //如果是第三状态 下拉状态
+                            //如果是第二状态 下拉状态
                             if (state == PULL_SECOND && isRecondY) {
                                 setSelection(0);
                                 if (-headerViewHeight + offsetY / 3 >= 0) {
-                                    state = PULL_FOUTH;
+                                    state = PULL_THIRD;
                                     headerViewState(state);
                                 } else if (offsetY <= 0) {
                                     state = PULL_FIRST;
@@ -232,7 +234,7 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
                             headerViewState(state);
                         }
                         //如果是第三状态  放开刷新状态
-                        if (state == PULL_THIRD){
+                        if (state == PULL_THIRD) {
                             this.smoothScrollBy((int) (-headerViewHeight + offsetY / 3) + headerViewHeight, 500);//隐藏headView
                             state = PULL_FOUTH;
                             mOnMyRefreshListener.onRefresh();

@@ -7,21 +7,19 @@
 
     <com.zz.pullrefreshdemo.PullFirstView
         android:id="@+id/pull_refresh_first_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_width="45dp"
+        android:layout_height="45dp"/>
 
-    <ImageView
+    <com.zz.pullrefreshdemo.PullSecondView
         android:id="@+id/pull_refresh_second_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/refreshing_image_frame_05"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
         android:visibility="gone"/>
 
-    <ImageView
+    <com.zz.pullrefreshdemo.PullThirdView
         android:id="@+id/pull_refresh_third_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/refresh_to_end_anim"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
         android:visibility="gone"/>
 
     <TextView
@@ -29,5 +27,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:text="下拉刷新"/>
 </LinearLayout>
