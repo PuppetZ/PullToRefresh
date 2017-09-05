@@ -31,7 +31,6 @@ public class PullThirdView extends View {
 
     private void init() {
         endBitmap = Bitmap.createBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.pull_end_image_frame_05));
-
     }
 
     @Override

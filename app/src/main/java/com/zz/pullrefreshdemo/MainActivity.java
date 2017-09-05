@@ -1,11 +1,14 @@
 package com.zz.pullrefreshdemo;
 
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +16,31 @@ public class MainActivity extends AppCompatActivity implements PullToRefreshList
     private PullToRefreshListView list_view;
     private List<String> mList = new ArrayList<>();
     private ArrayAdapter<String> mAdapter;
+    private IntentHandler mIntentHandler = new IntentHandler(this);
+
+    private static class IntentHandler extends Handler {
+        private WeakReference<MainActivity> mActivity;
+
+        public IntentHandler(MainActivity activity) {
+            mActivity = new WeakReference<MainActivity>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            MainActivity activity = mActivity.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case 0:
+                        activity.list_view.setOnRefreshComplete();
+                        activity.mAdapter.notifyDataSetChanged();
+                        activity.list_view.setSelection(0);
+                        break;
+                }
+            } else {
+                super.handleMessage(msg);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +62,18 @@ public class MainActivity extends AppCompatActivity implements PullToRefreshList
 
     @Override
     public void onRefresh() {
-        Toast.makeText(this,"下拉刷新",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "下拉刷新", Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                    mList.add(0, "new data");
+                    mIntentHandler.sendEmptyMessage(0);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }

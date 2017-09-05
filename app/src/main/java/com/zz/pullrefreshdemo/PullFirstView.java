@@ -10,7 +10,6 @@ import android.view.View;
 
 /**
  * Created by zhangjing on 2017/8/18.
- *
  */
 
 public class PullFirstView extends View {
@@ -42,6 +41,14 @@ public class PullFirstView extends View {
         endBitmap = Bitmap.createBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.refreshing_image_frame_05));
     }
 
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(measureWidth(widthMeasureSpec), measureWidth(widthMeasureSpec) * endBitmap.getHeight() / endBitmap.getWidth());
+    }
+
+
     /**
      * 绘制view的宽度大小
      * 因为view中的第二状态图片的大小是确定的，所以根据第二状态的图片来确定view的大小
@@ -65,25 +72,19 @@ public class PullFirstView extends View {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(measureWidth(widthMeasureSpec), endBitmap.getHeight() / endBitmap.getWidth() * measureWidth(widthMeasureSpec));
-    }
-
-    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         measureWidth = getMeasuredWidth();
         measureHeight = getMeasuredHeight();
         //通过获取view的大小  对第一开始的图片进行缩放
-        scaledBitmap = Bitmap.createScaledBitmap(startBitmap, measureWidth, endBitmap.getHeight() / endBitmap.getWidth() * measureWidth, true);
+        scaledBitmap = Bitmap.createScaledBitmap(startBitmap, measureWidth, measureWidth * startBitmap.getHeight() / startBitmap.getWidth(), true);
 
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        //设置view的缩放 （宽缩放比例，高缩放比例，基准点的X坐标，基准点的Y坐标）
+        //设置view的缩放(通过对画布的缩放) （宽缩放比例，高缩放比例，基准点的X坐标，基准点的Y坐标）
         canvas.scale(mCurrentProgress, mCurrentProgress, measureWidth / 2, measureHeight / 2);
         //绘制view
         canvas.drawBitmap(scaledBitmap, 0, measureHeight / 4, null);

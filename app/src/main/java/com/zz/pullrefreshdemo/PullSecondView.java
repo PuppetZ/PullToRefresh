@@ -12,6 +12,7 @@ import android.view.View;
  */
 
 public class PullSecondView extends View {
+
     private Bitmap endBitmap;
 
 
@@ -35,10 +36,15 @@ public class PullSecondView extends View {
         endBitmap = Bitmap.createBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.pull_end_image_frame_05));
     }
 
+    /**
+     * 设置view的宽高
+     * @param widthMeasureSpec
+     * @param heightMeasureSpec
+     */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(measureWidth(widthMeasureSpec), measureWidth(widthMeasureSpec) / endBitmap.getWidth() * endBitmap.getHeight());
+        setMeasuredDimension(measureWidth(widthMeasureSpec), measureWidth(widthMeasureSpec)* endBitmap.getHeight() / endBitmap.getWidth() );
     }
 
     private int measureWidth(int widthMeasureSpec) {

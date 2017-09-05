@@ -8,7 +8,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -77,7 +76,7 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
     private void initView(Context context) {
         setOnScrollListener(this);
         setOverScrollMode(OVER_SCROLL_NEVER);//Overscroll（边界回弹）效果 当滑动到边界的时候，如果再滑动，就会有一个边界就会有一个发光效果。
-        headerView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.pull_refresh, null);
+        headerView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.pull_refresh, null, false);
         pull_refresh_first_view = (PullFirstView) headerView.findViewById(R.id.pull_refresh_first_view);
         pull_refresh_second_view = (PullSecondView) headerView.findViewById(R.id.pull_refresh_second_view);
         pull_refresh_third_view = (PullThirdView) headerView.findViewById(R.id.pull_refresh_third_view);
@@ -108,7 +107,7 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
         if (params == null) {
             params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
-        int headerViewWidthSpec = ViewGroup.getChildMeasureSpec(0, 0, params.width);
+        int headerViewWidthSpec = ViewGroup.getChildMeasureSpec(0, 0 + 0, params.width);
         int lpHeight = params.height;
         int headerViewHeightSpec;
         if (lpHeight > 0) {//如果下拉刷新的view 高度>0，高度是精确的
@@ -158,6 +157,8 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
                 thirdAnim.start();
                 pull_refresh_text_view.setText("正在刷新");
                 break;
+            default:
+                break;
         }
     }
 
@@ -179,21 +180,21 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
                             isRecondY = true;
                             startY = tempY;
                         }
-                        //如果当前状态不是第三状态 正在刷新 ，记录Y坐标
-                        if (state != PULL_THIRD && isRecondY) {
+                        //如果当前状态不是第四状态 正在刷新 ，记录Y坐标
+                        if (state != PULL_FOUTH && isRecondY) {
                             offsetY = tempY - startY;//Y轴偏移
                             float currentHeight = (-headerViewHeight + offsetY / 3);//当前Y轴滑动距离 3就是随便一个系数
                             float currentProgress = 1 + currentHeight / headerViewHeight;//用当前滑动的高度和头部headerView的总高度进行比 计算出当前滑动的百分比 0到1
-                            if (currentProgress > 1) {//如果百分比>1，默认为1
+                            if (currentProgress >= 1) {//如果百分比>1，默认为1
                                 currentProgress = 1;
                             }
-                            //如果是第四状态 正在刷新
-                            if (state == PULL_FOUTH && isRecondY) {
+                            //如果是第三状态 放开刷新
+                            if (state == PULL_THIRD) {
                                 setSelection(0);//默认lv选择了第一个item
                                 if (-headerViewHeight + offsetY / 3 < 0) {//下拉的位移小于headview，继续是下拉状态
                                     state = PULL_SECOND;
                                     headerViewState(state);
-                                } else if (offsetY < 0) {//下拉位移<0，是第一个状态
+                                } else if (offsetY <= 0) {//下拉位移<0，是第一个状态
                                     state = PULL_FIRST;
                                     headerViewState(state);
                                 }
@@ -213,18 +214,20 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
                             if (state == PULL_FIRST && isRecondY) {
                                 if (offsetY >= 0) {
                                     state = PULL_SECOND;
-                                    headerViewState(state);
+                                    /*headerViewState(state);*/
                                 }
                             }
                             //如果是第二状态  下拉状态  或者第三状态  放开刷新状态
-                            if (state == PULL_SECOND || state == PULL_FOUTH) {
+                            if (state == PULL_SECOND /*|| state == PULL_THIRD*/) {
                                 headerView.setPadding(0, (int) (-headerViewHeight + offsetY / 3), 0, 0);
                                 pull_refresh_first_view.setCurrentProgress(currentProgress);
                                 pull_refresh_first_view.postInvalidate();//firstView重绘（在主线程可以重绘）
                             }
-                            /*if (state ==PULL_FOUTH){
-
-                            }*/
+                            if (state == PULL_THIRD) {
+                                headerView.setPadding(0, (int) (-headerViewHeight + offsetY / 3), 0, 0);
+                                pull_refresh_first_view.setCurrentProgress(currentProgress);
+                                pull_refresh_first_view.postInvalidate();
+                            }
                         }
                         break;
                     case MotionEvent.ACTION_UP:
@@ -235,7 +238,7 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
                         }
                         //如果是第三状态  放开刷新状态
                         if (state == PULL_THIRD) {
-                            this.smoothScrollBy((int) (-headerViewHeight + offsetY / 3) + headerViewHeight, 500);//隐藏headView
+                            this.smoothScrollBy((int) (-headerViewHeight + offsetY / 3), 500);//隐藏headView
                             state = PULL_FOUTH;
                             mOnMyRefreshListener.onRefresh();
                             headerViewState(state);
@@ -246,5 +249,11 @@ public class PullToRefreshListView extends ListView implements AbsListView.OnScr
             }
         }
         return super.onTouchEvent(ev);
+    }
+
+    public void setOnRefreshComplete() {
+        isEnd = true;
+        state = PULL_FIRST;
+        headerViewState(state);
     }
 }
